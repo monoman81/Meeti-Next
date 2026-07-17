@@ -1,0 +1,59 @@
+"use client"
+
+import {Form, FormError, FormInput, FormLabel, FormSubmit} from "@/components/forms";
+import {useForm} from "react-hook-form";
+import {zodResolver} from "@hookform/resolvers/zod";
+import {SetPasswordInput, SetPasswordSchema} from "@/src/features/auth/schemas/authSchema";
+import toast from "react-hot-toast";
+import {redirect, useSearchParams} from "next/navigation";
+import {setPasswordAction} from "@/src/features/auth/actions/auth-actions";
+
+export default function SetPasswordForm() {
+
+    const searchParams = useSearchParams();
+    const token = searchParams.get('token');
+
+    if (!token) {
+        redirect('/auth/forgot-password');
+    }
+
+    const {register, handleSubmit, formState: {errors}} = useForm({
+        resolver: zodResolver(SetPasswordSchema),
+        mode: 'all'
+    });
+
+    const onSubmit = async (data: SetPasswordInput) => {
+        const {error, success} = await setPasswordAction(data, token);
+        if (error)
+            toast.error(error);
+        if (success) {
+            toast.success(success);
+            redirect('/auth/login');
+        }
+    }
+
+    return (
+        <Form onSubmit={handleSubmit(onSubmit)}>
+            <FormLabel htmlFor="newPassword">Nuevo Password</FormLabel>
+            <FormInput
+                type="password"
+                id="newPassword"
+                placeholder="Ingresa tu Nuevo Password"
+                {...register('newPassword')}
+            />
+            {errors.newPassword && <FormError>{errors.newPassword.message}</FormError>}
+
+            <FormLabel htmlFor="passwordConfirmation">Repite tu Password</FormLabel>
+            <FormInput
+                type="password"
+                id="passwordConfirmation"
+                placeholder="Repite tu Nuevo Password"
+                {...register('passwordConfirmation')}
+            />
+            {errors.passwordConfirmation && <FormError>{errors.passwordConfirmation.message}</FormError>}
+
+            <FormSubmit value="Reestablecer Password" />
+
+        </Form>
+    )
+}
