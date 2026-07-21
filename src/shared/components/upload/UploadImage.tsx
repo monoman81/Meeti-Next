@@ -8,8 +8,9 @@ import {FormError} from "@/components/forms";
 
 export default function UploadImage() {
 
-    const {formState: {errors}, setValue} = useFormContext<CommunityInput>()
+    const {formState: {errors}, setValue, clearErrors, getValues} = useFormContext<CommunityInput>()
     const [uploadedImage, setUploadedImage] = useState('');
+    const currentImage = getValues('image') ? getValues('image') : null;
 
     return (
         <>
@@ -18,7 +19,8 @@ export default function UploadImage() {
                 className="ut-button:bg-orange-600 hover:ut-button:bg-orange-700"
                 onClientUploadComplete={(res) => {
                     setUploadedImage(res[0].ufsUrl);
-                    setValue('image', res[0].ufsUrl, {shouldValidate: true});
+                    setValue('image', res[0].ufsUrl);
+                    clearErrors('image');
                 }}
                 appearance={{
                     button: "font-black py-3 w-full block h-auto rounded-none after:bg-orange-500 after:h-2 after:top-0",
@@ -40,6 +42,12 @@ export default function UploadImage() {
                 <>
                     <p className="text-lg font-bold">Imagen Nueva:</p>
                     <Image src={uploadedImage} alt="Imagen Nueva" width={300} height={300} />
+                </>
+            )}
+            {currentImage && !uploadedImage && (
+                <>
+                    <p className="text-lg font-bold">Imagen Actual:</p>
+                    <Image src={currentImage} alt="Imagen Nueva" width={300} height={300} />
                 </>
             )}
         </>

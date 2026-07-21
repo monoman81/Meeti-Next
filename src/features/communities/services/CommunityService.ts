@@ -3,6 +3,7 @@ import {CommunityInput} from "@/src/features/communities/schemas/communitySchema
 import {User} from "better-auth";
 import {CommunityPolicy} from "@/src/features/communities/policies/CommunityPolicy";
 import {MembershipPolicy} from "@/src/features/communities/policies/MembershipPolicy";
+import {notFound} from "next/navigation";
 
 class CommunityService {
     constructor(private communityRepository: ICommunityRepository) {
@@ -15,9 +16,17 @@ class CommunityService {
         });
     }
 
+    async updateCommunity(data: CommunityInput, communityId: string, user: User) {
+        const community = await this.getCommunity(communityId);
+        if (!CommunityPolicy.canEdit(user, community)) {
+            throw new Error('No tienes permiso para editar esta comunidad');
+        }
+        await this.communityRepository.update(data, community.id);
+    }
+
     async getUserCommunities(user: User) {
         const communities = await this.communityRepository.findByUser(user.id);
-        const enriched = await Promise.all(communities.map(async community => {
+        return await Promise.all(communities.map(async community => {
             const isMember = true;
             return {
                 data: community,
@@ -34,7 +43,31 @@ class CommunityService {
                 }
             }
         }));
-        return enriched;
+    }
+
+    async getCommunity(communityId: string) {
+        const community = await this.communityRepository.findById(communityId);
+        if (!community) notFound();
+        return community;
+    }
+
+    async getCommunityDetails(communityId: string, user: User) {
+        const community = await this.getCommunity(communityId);
+        const isMember = false;
+        return {
+            data: community,
+            context: {
+                isMember,
+                isAdmin: CommunityPolicy.isAdmin(user, community),
+            },
+            permissions: {
+                canEdit: CommunityPolicy.canEdit(user, community),
+                canDelete: CommunityPolicy.canDelete(user, community),
+                canJoin: MembershipPolicy.canJoin(user, community, isMember),
+                canLeave: MembershipPolicy.canLeave(user, community, isMember),
+                canViewMembers: CommunityPolicy.canViewMembers(user, community)
+            }
+        }
     }
 
 }
