@@ -4,6 +4,9 @@ import {User} from "better-auth";
 import {CommunityPolicy} from "@/src/features/communities/policies/CommunityPolicy";
 import {MembershipPolicy} from "@/src/features/communities/policies/MembershipPolicy";
 import {notFound} from "next/navigation";
+import {CheckPasswordInput} from "@/src/features/auth/schemas/authSchema";
+import {checkPassword} from "@/shared/utils/auth";
+import {deleteUTFiles} from "@/lib/uploadthing-server";
 
 class CommunityService {
     constructor(private communityRepository: ICommunityRepository) {
@@ -22,6 +25,27 @@ class CommunityService {
             throw new Error('No tienes permiso para editar esta comunidad');
         }
         await this.communityRepository.update(data, community.id);
+    }
+
+    async deleteCommunity(communityId: string, password: string, user: User) {
+        const community = await this.getCommunity(communityId);
+        if (!community) return notFound();
+        if (!CommunityPolicy.canDelete(user, community)) {
+            throw new Error('No tienes permiso para eliminar esta comunidad');
+        }
+        const isValidPassword = await checkPassword(password);
+        if (!isValidPassword) {
+            return {
+                error: 'El password es incorreto',
+                success: ''
+            }
+        }
+        await this.communityRepository.delete(communityId);
+        await deleteUTFiles(community.image);
+        return {
+            error: '',
+            success: 'Comunidad eliminada correctamente'
+        }
     }
 
     async getUserCommunities(user: User) {

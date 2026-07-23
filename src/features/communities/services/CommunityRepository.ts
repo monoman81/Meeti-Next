@@ -7,6 +7,7 @@ import {CommunityInput} from "@/src/features/communities/schemas/communitySchema
 export interface ICommunityRepository {
     create(data: InsertCommunity): Promise<SelectCommunity>;
     update(data: CommunityInput, communityId: string): Promise<void>;
+    delete(communityId: string): Promise<void>;
     findByUser(userId: string, limit?: number): Promise<SelectCommunity[]>;
     findById(id: string): Promise<SelectCommunity | undefined>;
 }
@@ -18,14 +19,16 @@ class CommunityRepository implements ICommunityRepository {
     }
 
     async update(data: CommunityInput, communityId: string) {
-        console.log(data);
-        console.log(communityId);
         // await db.update(community).set({
         //     name: data.name,
         //     description: data.description,
         //     image: data.image,
         // }).where(eq(community.id, communityId));
         await db.update(community).set({...data}).where(eq(community.id, communityId));
+    }
+
+    async delete(communityId: string) {
+        await db.delete(community).where(eq(community.id, communityId));
     }
 
     async findByUser(userId: string, limit = 10) {
