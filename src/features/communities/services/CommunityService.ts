@@ -4,12 +4,15 @@ import {User} from "better-auth";
 import {CommunityPolicy} from "@/src/features/communities/policies/CommunityPolicy";
 import {MembershipPolicy} from "@/src/features/communities/policies/MembershipPolicy";
 import {notFound} from "next/navigation";
-import {CheckPasswordInput} from "@/src/features/auth/schemas/authSchema";
 import {checkPassword} from "@/shared/utils/auth";
 import {deleteUTFiles} from "@/lib/uploadthing-server";
+import {IMembershipRepository, membershipRepository} from "@/src/features/communities/services/MembershipRepository";
 
 class CommunityService {
-    constructor(private communityRepository: ICommunityRepository) {
+    constructor(
+        private communityRepository: ICommunityRepository,
+        private membershipRepository: IMembershipRepository
+    ) {
     }
 
     async createCommunity(data: CommunityInput, userId: string) {
@@ -51,9 +54,11 @@ class CommunityService {
     async getUserCommunities(user: User) {
         const communities = await this.communityRepository.findByUser(user.id);
         return await Promise.all(communities.map(async community => {
+            const memberCount = await this.membershipRepository.getMemberCount(community.id);
             const isMember = true;
             return {
                 data: community,
+                memberCount,
                 context: {
                     isMember,
                     isAdmin: CommunityPolicy.isAdmin(user, community),
@@ -75,11 +80,23 @@ class CommunityService {
         return community;
     }
 
-    async getCommunityDetails(communityId: string, user: User) {
+    async getCommunityDetails(communityId: string, user?: User) {
         const community = await this.getCommunity(communityId);
-        const isMember = false;
+        const memberCount = await this.membershipRepository.getMemberCount(community.id);
+        if (!user) {
+            return {
+                data: community,
+                memberCount,
+                context: null,
+                permissions: null
+            }
+        }
+
+        const isMember = await membershipRepository.isMember(community.id, user.id);
+
         return {
             data: community,
+            memberCount,
             context: {
                 isMember,
                 isAdmin: CommunityPolicy.isAdmin(user, community),
@@ -96,4 +113,4 @@ class CommunityService {
 
 }
 
-export const communityService = new CommunityService(communityRepository);
+export const communityService = new CommunityService(communityRepository, membershipRepository);

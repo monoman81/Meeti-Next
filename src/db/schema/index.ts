@@ -1,10 +1,13 @@
 import {users, sessions, accounts, verifications} from "./auth";
-import {community} from "./community";
+import {community, communityMembers} from "./community";
+import { notification } from "./notification";
 
 export {
     users,
     sessions,
     accounts,
     verifications,
-    community
+    community,
+    communityMembers,
+    notification
 };

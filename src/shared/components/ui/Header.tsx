@@ -1,8 +1,13 @@
 import Link from "next/link";
 import Logo from "@/src/shared/components/ui/Logo";
 import GuestNavigation from "@/components/ui/GuestNavigation";
+import {requireAuthentication} from "@/lib/auth-server";
+import UserNavigation from "@/components/ui/UserNavigation";
 
-export default function Header() {
+export default async function Header() {
+
+    const {isAuthenticated} = await requireAuthentication();
+
     return (
         <header className="border-b border-gray-200">
             <div className="md:flex md:justify-between md:items-center max-w-7xl mx-auto p-5 lg:px-0">
@@ -13,7 +18,11 @@ export default function Header() {
                         </div>
                     </Link>
                 </div>
-                <GuestNavigation />
+                {isAuthenticated ? (
+                    <UserNavigation />
+                ) : (
+                    <GuestNavigation />
+                )}
             </div>
         </header>
     )

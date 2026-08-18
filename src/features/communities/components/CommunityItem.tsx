@@ -2,6 +2,7 @@ import {CommunityEnriched} from "@/src/features/communities/types/community.type
 import Image from "next/image";
 import Link from "next/link";
 import CommunityDropdownMenu from "@/src/features/communities/components/CommunityDropDownMenu";
+import {pluralize} from "@/shared/utils/string";
 
 type CommunityItemProps = {
     community: CommunityEnriched
@@ -25,11 +26,11 @@ export default function CommunityItem({ community }: CommunityItemProps) {
                     />
                 </div>
                 <div className="min-w-0 flex-auto">
-                    <Link href={`/`} className="hover:underline font-bold text-lg">
+                    <Link href={`/communities/${id}`} target="_blank" className="hover:underline font-bold text-lg">
                         {name}
                     </Link>
                     <p className="text-gray-600 text-sm line-clamp-2">{description}</p>
-                    <p className="text-gray-600 text-sm"></p>
+                    <p className="text-gray-600 text-sm">{community.memberCount} {pluralize('Miembro', community.memberCount)}</p>
                 </div>
             </div>
             <div className="flex shrink-0 items-center gap-x-6">

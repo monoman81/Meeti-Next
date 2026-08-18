@@ -1,10 +1,36 @@
-import { BellIcon } from '@heroicons/react/24/outline'
+import { BellIcon } from '@heroicons/react/24/outline';
+import {Suspense, use, useEffect, useState} from "react";
+import Link from "next/link";
+import Pusher from 'pusher-js';
+import {useSession} from "@/lib/auth-client";
+
+const notificationPromise = fetch('/api/user/notification').then(res => res.json());
 
 function NotificationCount() {
-    const totalNotifications = 0
+    const unreadNotifications: number = use(notificationPromise);
+    const [totalNotifications, setTotalNotifications] = useState(unreadNotifications);
+    const {data} = useSession();
+
+    useEffect(() => {
+        const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY!, {
+            cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER!,
+        });
+        const channelId = `notifications-channel-${data?.user.id}`;
+        const channel = pusher.subscribe(channelId);
+        channel.bind('new-notification', () => {
+            setTotalNotifications(prev => prev + 1);
+        });
+        channel.bind('all-notifications-read', () => {
+            setTotalNotifications(0);
+        });
+        return () => {
+            channel.unbind_all();
+            channel.unsubscribe();
+        }
+    }, [data]);
 
     return (
-        <a
+        <Link href={'/dashboard/notifications'}
             className="relative rounded-full p-1 text-gray-400 focus:outline-2 focus:outline-offset-2 focus:outline-indigo-500 dark:hover:text-white"
         >
             <span className="sr-only">View notifications</span>
@@ -14,12 +40,14 @@ function NotificationCount() {
                     {totalNotifications}
                 </span>
             )}
-        </a>
+        </Link>
     )
 }
 
 export default function NotificationsPanel() {
     return (
-        <NotificationCount />
+        <Suspense fallback="Cargando...">
+            <NotificationCount />
+        </Suspense>
     )
 }
