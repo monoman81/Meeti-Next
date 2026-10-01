@@ -3,7 +3,7 @@ import clsx from 'clsx';
 
 type Props = FormHTMLAttributes<HTMLFormElement>;
 
-export default function Form(props: Props) {
+export function Form(props: Props) {
 
     const {className} = props;
 

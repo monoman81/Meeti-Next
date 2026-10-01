@@ -1,4 +1,4 @@
-import {FormError, FormInput, FormLabel, FormTextArea} from "@/components/forms";
+import {FormError, FormInput, FormLabel, FormTextarea} from "@/components/forms";
 import {useFormContext} from "react-hook-form";
 import {CommunityInput} from "@/src/features/communities/schemas/communitySchema";
 import {useState} from "react";
@@ -21,7 +21,7 @@ export default function CommunityForm() {
             <UploadImage />
 
             <FormLabel htmlFor="description">Descripción Comunidad</FormLabel>
-            <FormTextArea
+            <FormTextarea
                 id="description"
                 placeholder='Descripción Comunidad'
                 {...register('description')}

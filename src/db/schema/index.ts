@@ -1,6 +1,8 @@
 import {users, sessions, accounts, verifications} from "./auth";
 import {community, communityMembers} from "./community";
-import { notification } from "./notification";
+import {notification} from "./notification";
+import {category} from "./category";
+import {meeti, meetiLocations} from "./meeti";
 
 export {
     users,
@@ -9,5 +11,8 @@ export {
     verifications,
     community,
     communityMembers,
-    notification
+    notification,
+    category,
+    meeti,
+    meetiLocations
 };

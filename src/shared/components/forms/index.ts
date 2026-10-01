@@ -1,15 +1,8 @@
-import Form from './Form';
-import FormInput from './FormInput';
-import FormLabel from "./FormLabel";
-import FormSubmit from "./FormSubmit";
-import FormError from "./FormError";
-import FormTextArea from "./FormTextArea";
-
-export {
-    Form,
-    FormInput,
-    FormLabel,
-    FormSubmit,
-    FormError,
-    FormTextArea
-};
+export {Form} from './Form';
+export {FormInput} from './FormInput';
+export {FormLabel} from "./FormLabel";
+export {FormSubmit} from "./FormSubmit";
+export {FormError} from "./FormError";
+export {FormTextarea} from "./FormTextarea";
+export {FormToggle} from "./FormToggle";
+export {FormSelect} from "./FormSelect";

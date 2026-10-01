@@ -32,7 +32,7 @@ class CommunityRepository implements ICommunityRepository {
     }
 
     async findByUser(userId: string, limit = 10) {
-        return await db
+        return db
             .select()
             .from(community)
             .where(eq(community.createdBy, userId))

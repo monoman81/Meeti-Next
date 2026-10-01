@@ -34,7 +34,7 @@ class NotificationService implements INotificationService {
 
     async clearNotifications(userId: string): Promise<void> {
         await this.notificationRepository.deleteByUserId(userId);
-        await notificationPusher.notifyAllRead(userId);
+        await this.notificationPusher.notifyAllRead(userId);
     }
 
 }
